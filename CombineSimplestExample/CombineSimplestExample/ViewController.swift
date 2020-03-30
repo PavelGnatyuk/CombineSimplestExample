@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Combine
 
 class ViewController: UIViewController {
 
@@ -31,12 +32,16 @@ class ViewController: UIViewController {
         return button
     }()
 
+    @Published private var isDoneEnabled: Bool = false
+    private var enabling: AnyCancellable?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         navigationItem.rightBarButtonItem = buttonDone
         view.addSubview(textFieldName)
         NSLayoutConstraint.activate(textFieldLayout)
+        enabling = $isDoneEnabled.receive(on: DispatchQueue.main).assign(to: \.isEnabled, on: buttonDone)
         textFieldName.becomeFirstResponder()
     }
 
@@ -49,7 +54,7 @@ extension ViewController: UITextFieldDelegate {
     }
     
     public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        buttonDone.isEnabled = (!string.isEmpty || range.length < (textField.text ?? "").count)
+        isDoneEnabled = (!string.isEmpty || range.length < (textField.text ?? "").count)
         return true
     }
 }
